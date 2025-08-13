@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FadeIn, SlideUp } from '../../components/Animations';
 import { apiClient } from '../../lib/apiClient';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 // Komponen Spinner
 function Spinner() {
@@ -33,55 +33,80 @@ function Spinner() {
   );
 }
 
-export default function RegisterPage() {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export default function ResetPasswordPage() {
+  const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
+
   const errorRef = useRef(null);
+  const successRef = useRef(null);
+
+  // Cek token saat halaman load
+  useEffect(() => {
+    if (!token) {
+      setError('Token tidak ditemukan. Link reset password tidak valid.');
+    }
+  }, [token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!username || !email || !password || !confirmPassword) {
-      setError('Semua field wajib diisi');
+    if (!token) {
+      setError('Token tidak ditemukan.');
+      return;
+    }
+
+    if (!newPassword || !confirmPassword) {
+      setError('Semua field wajib diisi.');
       errorRef.current?.scrollIntoView({ behavior: 'smooth' });
       return;
     }
 
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      setError('Format email tidak valid');
+    if (newPassword !== confirmPassword) {
+      setError('Password baru dan konfirmasi tidak cocok.');
       errorRef.current?.scrollIntoView({ behavior: 'smooth' });
       return;
     }
 
-    if (password !== confirmPassword) {
-      setError('Password dan konfirmasi tidak cocok');
+    if (newPassword.length < 8) {
+      setError('Password minimal 8 karakter.');
+      errorRef.current?.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+
+    // Minimal: huruf besar, angka, simbol (regex sederhana)
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      setError('Password harus mengandung huruf besar, angka, dan simbol.');
       errorRef.current?.scrollIntoView({ behavior: 'smooth' });
       return;
     }
 
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
-      const data = await apiClient('/register', {
-        method: 'POST',
+      await apiClient('/reset-password', {
+        method: 'PUT',
         body: JSON.stringify({
-          username,
-          email,
-          password,
-          confirm_password: confirmPassword,
+          token,
+          new_password: newPassword,
+          confirm_new_password: confirmPassword,
         }),
       });
 
-      alert(data.message || 'Akun berhasil dibuat! Silakan cek email untuk verifikasi.');
-      router.push('/login');
+      setSuccess('Password berhasil direset. Akan dialihkan ke login...');
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
     } catch (err) {
-      setError(err.message || 'Registrasi gagal. Coba lagi.');
+      setError(err.message || 'Gagal mereset password. Token mungkin sudah kadaluarsa.');
       errorRef.current?.scrollIntoView({ behavior: 'smooth' });
     } finally {
       setLoading(false);
@@ -90,16 +115,15 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-blue-50 flex items-center justify-center px-4 py-12">
-      {/* Container utama: tetap di tengah */}
       <FadeIn>
-        <div className="w-full max-w-4xl bg-white shadow-2xl rounded-3xl overflow-hidden flex flex-col md:flex-row">
+        <div className="w-full max-w-4xl h-auto md:h-[600px] bg-white shadow-2xl rounded-3xl overflow-hidden flex flex-col md:flex-row">
           
           {/* Left Section - Illustration */}
           <div className="w-full md:w-1/2 bg-gradient-to-br from-sky-500 to-blue-600 text-white p-8 md:p-10 flex flex-col justify-center items-center">
             <div className="mt-10 w-full flex justify-center">
               <Image
                 src="/Mobile-encryption-amico-1.png"
-                alt="Register Illustration"
+                alt="Reset Password Illustration"
                 width={300}
                 height={250}
                 className="w-full max-w-xs md:max-w-sm h-auto object-contain"
@@ -107,8 +131,8 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Right Section - Register Form */}
-          <div className="w-full md:w-1/2 p-8 md:p-10 relative bg-gradient-to-br from-white to-sky-50">
+          {/* Right Section - Form */}
+          <div className="w-full md:w-1/2 p-8 md:p-10 relative bg-gradient-to-br from-white to-sky-50 flex flex-col justify-center">
             {/* Logo di latar belakang */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <Image
@@ -121,15 +145,17 @@ export default function RegisterPage() {
               />
             </div>
 
-            {/* Konten Form */}
-            <div className="relative z-10 space-y-6">
+            <div className="relative z-10">
               <SlideUp delay={300}>
-                <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-800">
-                  Registrasi
+                <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-2">
+                  Reset Password
                 </h2>
               </SlideUp>
 
-              {/* Error tetap muncul, tapi tidak geser card */}
+              <p className="text-center text-gray-600 text-sm mb-6">
+                Masukkan password baru untuk akun Anda.
+              </p>
+
               {error && (
                 <SlideUp delay={400}>
                   <p
@@ -141,71 +167,39 @@ export default function RegisterPage() {
                 </SlideUp>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-5">
+              {success && (
                 <SlideUp delay={400}>
-                  <div>
-                    <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                      Username
-                    </label>
-                    <input
-                      type="text"
-                      id="username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-xl shadow-sm 
-                                 focus:ring-2 focus:ring-sky-400 focus:border-sky-500 
-                                 bg-white text-gray-900 placeholder-gray-500
-                                 transition duration-200 ease-in-out
-                                 disabled:bg-gray-100"
-                      placeholder="Masukkan username"
-                      disabled={loading}
-                    />
-                  </div>
+                  <p
+                    ref={successRef}
+                    className="text-green-500 text-sm text-center mb-4 bg-green-50 p-3 rounded-lg"
+                  >
+                    {success}
+                  </p>
                 </SlideUp>
+              )}
 
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <SlideUp delay={500}>
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                      Email
+                    <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                      Password Baru
                     </label>
                     <input
-                      type="email"
-                      id="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      type="password"
+                      id="newPassword"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
                       className="w-full p-3 border border-gray-300 rounded-xl shadow-sm 
                                  focus:ring-2 focus:ring-sky-400 focus:border-sky-500 
                                  bg-white text-gray-900 placeholder-gray-500
-                                 transition duration-200 ease-in-out
-                                 disabled:bg-gray-100"
-                      placeholder="Masukkan email"
-                      disabled={loading}
+                                 transition duration-200 ease-in-out"
+                      placeholder="Masukkan password baru"
+                      disabled={loading || !token}
                     />
                   </div>
                 </SlideUp>
 
                 <SlideUp delay={600}>
-                  <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                      Password
-                    </label>
-                    <input
-                      type="password"
-                      id="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-xl shadow-sm 
-                                 focus:ring-2 focus:ring-sky-400 focus:border-sky-500 
-                                 bg-white text-gray-900 placeholder-gray-500
-                                 transition duration-200 ease-in-out
-                                 disabled:bg-gray-100"
-                      placeholder="Masukkan password"
-                      disabled={loading}
-                    />
-                  </div>
-                </SlideUp>
-
-                <SlideUp delay={650}>
                   <div>
                     <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
                       Konfirmasi Password
@@ -218,26 +212,17 @@ export default function RegisterPage() {
                       className="w-full p-3 border border-gray-300 rounded-xl shadow-sm 
                                  focus:ring-2 focus:ring-sky-400 focus:border-sky-500 
                                  bg-white text-gray-900 placeholder-gray-500
-                                 transition duration-200 ease-in-out
-                                 disabled:bg-gray-100"
-                      placeholder="Ulangi password"
-                      disabled={loading}
+                                 transition duration-200 ease-in-out"
+                      placeholder="Ulangi password baru"
+                      disabled={loading || !token}
                     />
                   </div>
                 </SlideUp>
 
                 <SlideUp delay={700}>
-                  <div className="text-right">
-                    <Link href="/forgot-password" className="text-sm text-sky-600 hover:underline hover:text-sky-800 transition">
-                      Lupa Password?
-                    </Link>
-                  </div>
-                </SlideUp>
-
-                <SlideUp delay={800}>
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || !token}
                     className="w-full bg-gradient-to-r from-blue-900 to-sky-700 text-white py-3 rounded-xl 
                                hover:from-blue-800 hover:to-sky-600 
                                transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 
@@ -246,21 +231,22 @@ export default function RegisterPage() {
                     {loading ? (
                       <>
                         <Spinner />
-                        Processing...
+                        Mereset...
                       </>
                     ) : (
-                      'Register'
+                      'Reset Password'
                     )}
                   </button>
                 </SlideUp>
               </form>
 
-              <SlideUp delay={900} className="text-center mt-2 text-sm text-gray-600">
-                Dengan mendaftar, kamu menyetujui{' '}
-                <Link href="/terms" className="text-sky-600 hover:underline font-medium">
-                  Syarat & Ketentuan
-                </Link>{' '}
-                kami.
+              <SlideUp delay={800} className="text-center mt-6">
+                <Link
+                  href="/login"
+                  className="text-sm text-sky-700 hover:text-sky-900 font-medium hover:underline transition-all"
+                >
+                  Kembali ke Login
+                </Link>
               </SlideUp>
             </div>
           </div>
