@@ -10,16 +10,27 @@ export default function LogoScroller() {
     if (!container) return;
 
     const logoSources = [
-      "https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png",
-      "https://upload.wikimedia.org/wikipedia/commons/6/61/HTML5_logo_and_wordmark.svg",
-      "https://upload.wikimedia.org/wikipedia/commons/d/d5/CSS3_logo_and_wordmark.svg",
-      "https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg",
-      "https://upload.wikimedia.org/wikipedia/commons/3/3f/Git_icon.svg"
+      "/slider/canonical.svg",
+      "/slider/brave-brands-solid-full.svg",
+      "/slider/7417366_vs code_visual studio code_logo_code_icon.png",
+      "/slider/cplusplus.svg",
+      "/slider/css-brands-solid-full.svg",
+      "/slider/figma-brands-solid-full.svg",
+      "/slider/github-brands-solid-full.svg",
+      "/slider/html5-brands-solid-full.svg",
+      "/slider/git.svg",
+      "/slider/java-brands-solid-full.svg",
+      "/slider/linux-brands-solid-full.svg",
+      "/slider/openai.svg",
+      "/slider/python-brands-solid-full.svg",
+      "/slider/react-brands-solid-full.svg",
+      "/slider/square-js-brands-solid-full.svg",
+      "/slider/tradingview.svg",
     ];
 
-    const logoCount = 17;
+    const logoCount = 16;
     const logoWidth = 65;
-    const spacing = 20;
+    const spacing = 16;
     const speed = 1.2;
 
     const logos = [];
@@ -28,10 +39,14 @@ export default function LogoScroller() {
       const img = document.createElement('img');
       img.src = logoSources[i % logoSources.length];
       img.className = "absolute h-12 w-12 object-contain";
-      img.style.left = `${i * (logoWidth + spacing)}px`;
+      img.style.left = `${i * (logoWidth + spacing)}px`;  // ✅ DIPERBAIKI: tambah backtick
       img.style.top = "0px";
       container.appendChild(img);
-      logos.push({ el: img, x: i * (logoWidth + spacing) });
+      logos.push({ 
+        el: img, 
+        x: i * (logoWidth + spacing),
+        currentIndex: i % logoSources.length
+      });
     }
 
     function animate() {
@@ -40,10 +55,10 @@ export default function LogoScroller() {
         if (logo.x < -(logoWidth)) {
           const maxX = Math.max(...logos.map(l => l.x));
           logo.x = maxX + logoWidth + spacing;
-          const randomLogo = logoSources[Math.floor(Math.random() * logoSources.length)];
-          logo.el.src = randomLogo;
+          logo.currentIndex = (logo.currentIndex + 1) % logoSources.length;
+          logo.el.src = logoSources[logo.currentIndex];
         }
-        logo.el.style.left = `${logo.x}px`;
+        logo.el.style.left = `${logo.x}px`; // ✅ DIPERBAIKI: backtick juga di sini
       });
       requestAnimationFrame(animate);
     }

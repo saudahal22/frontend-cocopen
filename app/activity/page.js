@@ -16,7 +16,7 @@ export default function Activity() {
         <section className="relative py-24 text-center">
           <div className="container mx-auto px-6">
             <FadeIn>
-              <h1 className="text-5xl md:text-7xl font-bold font-playfair mb-6 bg-gradient-to-r from-blue-800 via-sky-600 to-blue-900 bg-clip-text text-transparent animate-gradient">
+              <h1 className="text-5xl md:text-7xl font-bold font-playfair mb-6 py-3 bg-gradient-to-r from-blue-800 via-sky-600 to-blue-900 bg-clip-text text-transparent animate-gradient">
                 Kegiatan Kami
               </h1>
             </FadeIn>
@@ -32,11 +32,11 @@ export default function Activity() {
         <section className="relative py-24 bg-gradient-to-r from-white/90 to-sky-50/90">
           <div className="container mx-auto px-6">
             <FadeIn>
-              <div className="text-center mb-16">
-                <h2 className="text-4xl md:text-5xl font-bold font-playfair bg-gradient-to-r from-sky-600 via-blue-700 to-sky-600 bg-clip-text text-transparent">
+              <div className="text-center mb-16 ">
+                <h2 className="text-4xl md:text-5xl py-3 font-bold font-playfair bg-gradient-to-r from-sky-600 via-blue-700 to-sky-600 bg-clip-text text-transparent">
                   Program & Aktivitas
                 </h2>
-                <p className="text-lg text-gray-600 mt-10 max-w-3xl mx-auto">
+                <p className="text-lg text-gray-600 mt-4 max-w-3xl mx-auto">
                   Berbagai kegiatan inovatif yang dirancang untuk mengasah keterampilan dibidang teknologi.
                 </p>
               </div>
@@ -44,41 +44,43 @@ export default function Activity() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
               {[
-                {
-                  title: '',
-                  img: '/cocqalby.png',
+                {   
+                 
+                  title: 'Webinar',
+                  img: '/image/webinar.jpg',
                   delay: 200,
                 },
                 {
-                  title: '',
-                  img: '/cockakalby.png',
+                  title: 'Webinar',
+                  img: '/image/nawat.jpg',
                   delay: 300,
                 },
                 {
-                  title: '',
-                  img: '/cocnextjs.png',  
+                  title: 'Coconut Open Class',
+                  img: '/image/cocpare.png',
                   delay: 400,
                 },
                 {
-                  title: ' ',
-                  img: '/cockakmusdalipa.png',
+                  title: 'Coconut Open Class',
+                  img: '/image/coc2.png',
                   delay: 500,
-                  
                 },
+               
                 {
-                  title: '',
-                  img: '/cockakwindu.png',
-                  delay: 600,
-                },
-                {
-                  title: '',
+                  title: 'Coconut Open Class',
                   img: '/cocokakdayat.png',
+                  delay: 600,
+                },  
+                {
+                  title: 'Coconut Open Class',
+                  img: '/cocnextjs.png',
                   delay: 700,
                 },
+              
               ].map((activity, index) => (
                 <SlideUp key={index} delay={activity.delay}>
                   <div className="group relative bg-gradient-to-br from-white/95 to-sky-50/95 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-4 border border-white/60 backdrop-blur-sm">
-                    <div className="relative overflow-hidden rounded-2xl mb-4 h-">
+                    <div className="relative overflow-hidden rounded-2xl mb-4  ">
                       <Image
                         src={activity.img}
                         alt={activity.title}

@@ -7,15 +7,21 @@ import Image from 'next/image';
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // 🔶 Status login
 
-  // Deteksi scroll untuk animasi
+  // Cek apakah user sudah login dari localStorage
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const user = localStorage.getItem('coconut_user');
+    if (user) {
+      setIsLoggedIn(true);
+    }
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('coconut_user');
+    setIsLoggedIn(false);
+    alert('Anda berhasil keluar');
+  };
 
   return (
     <nav
@@ -51,15 +57,8 @@ export default function Navbar() {
               href={item.href}
               className="relative inline-block px-5 py-2 text-gray-800 font-medium rounded-lg transition-all duration-300 transform hover:scale-110 hover:shadow-lg group"
             >
-              {/* Teks utama (hanya satu, tidak double) */}
               {item.label}
-
-              {/* Background gradient transparan saat hover */}
-              <span
-                className="absolute inset-0 bg-gradient-to-r from-sky-500 to-blue-600 rounded-lg opacity-0 group-hover:opacity-60 transition-opacity duration-300"
-              ></span>
-
-              {/* Warna teks berubah ke putih saat hover */}
+              <span className="absolute inset-0 bg-gradient-to-r from-sky-500 to-blue-600 rounded-lg opacity-0 group-hover:opacity-60 transition-opacity duration-300"></span>
               <span className="absolute inset-0 flex items-center justify-center text-gray-800 group-hover:text-white transition-colors duration-300 pointer-events-none">
                 {item.label}
               </span>
@@ -67,17 +66,51 @@ export default function Navbar() {
           ))}
         </div>
 
-        <div className="flex space-x-4">
-          <Link href="/login">
-            <button className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 px-4 rounded-full transition-transform hover:scale-105 duration-300 hover:shadow-md">
-              Masuk
-            </button>
-          </Link>
-          <Link href="/registrasi">
-            <button className="bg-black hover:bg-gray-700 text-white font-bold py-1.5 px-4 rounded-full transition-transform hover:scale-105 duration-300 hover:shadow-md">
-              Daftar
-            </button>
-          </Link>
+        {/* Ganti tombol dengan ikon profil jika sudah login */}
+        <div className="flex items-center space-x-4">
+          {isLoggedIn ? (
+            <div className="relative group">
+              {/* Ikon Profil */}
+              <button className="relative h-10 w-10 rounded-full overflow-hidden border-2 border-sky-500 hover:border-sky-600 focus:outline-none">
+                <Image
+                  src="/user-avatar.png" // Ganti dengan path default avatar
+                  alt="Profil Pengguna"
+                  width={40}
+                  height={40}
+                  className="object-cover"
+                />
+              </button>
+
+              {/* Dropdown Logout */}
+              <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200">
+                <Link
+                  href="/profile"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-sky-100 rounded-t-lg"
+                >
+                  Profil
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-lg"
+                >
+                  Keluar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <Link href="/login">
+                <button className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 px-4 rounded-full transition-transform hover:scale-105 duration-300 hover:shadow-md">
+                  Masuk
+                </button>
+              </Link>
+              <Link href="/registrasi">
+                <button className="bg-black hover:bg-gray-700 text-white font-bold py-1.5 px-4 rounded-full transition-transform hover:scale-105 duration-300 hover:shadow-md">
+                  Daftar
+                </button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
@@ -147,16 +180,29 @@ export default function Navbar() {
             </Link>
 
             <div className="flex justify-center space-x-4 mt-4">
-              <Link href="/login">
-                <button className="bg-blue-500 hover:to-blue-800 text-white font-bold py-1.5 px-4 rounded-full text-sm transition-transform hover:scale-105">
-                  Masuk
-                </button>
-              </Link>
-              <Link href="/registrasi">
-                <button className="bg-black hover:bg-gray-700 text-white font-bold py-1.5 px-4 rounded-full text-sm transition-transform hover:scale-105">
-                  Daftar
-                </button>
-              </Link>
+              {isLoggedIn ? (
+                <div className="flex flex-col items-center">
+                  <button
+                    onClick={handleLogout}
+                    className="bg-red-500 text-white font-bold py-1.5 px-4 rounded-full text-sm transition hover:scale-105"
+                  >
+                    Keluar
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <button className="bg-blue-500 text-white font-bold py-1.5 px-4 rounded-full text-sm transition hover:scale-105">
+                      Masuk
+                    </button>
+                  </Link>
+                  <Link href="/registrasi">
+                    <button className="bg-black text-white font-bold py-1.5 px-4 rounded-full text-sm transition hover:scale-105">
+                      Daftar
+                    </button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

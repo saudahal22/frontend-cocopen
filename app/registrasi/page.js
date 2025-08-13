@@ -183,14 +183,18 @@ export default function RegisterPage() {
                   </button>
                 </SlideUp>
               </form>
-
-              <SlideUp delay={900} className="text-center mt-4 text-sm text-gray-600">
-                Dengan mendaftar, kamu menyetujui <Link href="/terms" className="text-sky-600 hover:underline">Syarat & Ketentuan</Link> kami.
-              </SlideUp>
+              <SlideUp delay={950} className="text-center mt-6 text-sm text-gray-600">
+  Sudah punya akun?{' '}
+  <Link href="/login" className="text-sky-600 font-medium hover:underline">
+    Masuk di sini
+  </Link>
+</SlideUp>
             </div>
           </div>
         </div>
       </FadeIn>
     </div>
+
+    
   );
 }
